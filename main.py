@@ -1,6 +1,5 @@
 import tkinter as tk
-from observer import Observer,HistoryLogger
-
+from observer import Observer
 
 
 class Calculator(tk.Tk):
@@ -10,17 +9,8 @@ class Calculator(tk.Tk):
         self.geometry("400x400")
         self.result_var = tk.StringVar()
         self._create_widgets()
-        self.observers = []
-
-    def attach(self, observer):
-        self.observers.append(observer)
-
-    def detach(self, observer):
-        self.observers.remove(observer)
-
-    def notify(self):
-        for observer in self.observers:
-            observer.update(self)
+        # Создание наблюдателя
+        self.observer = Observer()
 
     def _create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Helvetica', 24), justify='right')
@@ -45,19 +35,17 @@ class Calculator(tk.Tk):
         current_result = self.result_var.get()
         if text == 'Clear':
             self.result_var.set('')
-            if self.file:
-                self.file.close()
         elif text == '=':
             try:
                 result = str(eval(current_result))
                 self.result_var.set(result)
-                self.notify()
             except:
                 self.result_var.set("Ошибка")
         else:
             self.result_var.set(current_result + text)
+            # Уведомление наблюдателя о нажатии кнопки
+        
+        self.observer.update(text)
 
 app = Calculator()
-display = Observer(app)
-history_logger = HistoryLogger(app)
 app.mainloop()
